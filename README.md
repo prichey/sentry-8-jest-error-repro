@@ -1,35 +1,40 @@
-# Next.js + Jest
+Reproduction for https://github.com/getsentry/sentry-javascript/issues/12683
 
-This example shows how to configure Jest to work with Next.js.
+`npm run test` fails:
 
-This includes Next.js' built-in support for Global CSS, CSS Modules and TypeScript. This example also shows how to use Jest with the App Router and React Server Components.
+```
+ FAIL  app/utils/add.test.ts
+● Test suite failed to run
 
-> **Note:** Since tests can be co-located alongside other files inside the App Router, we have placed those tests in `app/` to demonstrate this behavior (which is different than `pages/`). You can still place all tests in `__tests__` if you prefer.
+  Cannot find module '@sentry/nextjs' from 'app/utils/add.ts'
 
-## Deploy your own
+  Require stack:
+    app/utils/add.ts
+    app/utils/add.test.ts
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-jest&project-name=with-jest&repository-name=with-jest)
+    10 |   }
+    11 | }
+  > 12 |
+        | ^
 
-## How to Use
-
-Quickly get started using [Create Next App](https://github.com/vercel/next.js/tree/canary/packages/create-next-app#readme)!
-
-In your terminal, run the following command:
-
-```bash
-npx create-next-app --example with-jest with-jest-app
+    at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+    at Object.<anonymous> (app/utils/add.ts:12:17)
+    at Object.<anonymous> (app/utils/add.test.ts:5:14)
 ```
 
-```bash
-yarn create next-app --example with-jest with-jest-app
+This repo matches the Next [with-jest](https://github.com/vercel/next.js/tree/canary/examples/with-jest) template.
+
+The only changes I made were:
+
+* `npm i @sentry/nextjs && npm i jest-environment-jsdom -D`
+* Modify `app/utils/add.ts` to import and use `captureException`
+* Add the following lines to `jest.config.js`:
+
+```
+testEnvironment: 'jest-environment-jsdom',
+testEnvironmentOptions: {
+  customExportConditions: [''],
+},
 ```
 
-```bash
-pnpm create next-app --example with-jest with-jest-app
-```
-
-## Running Tests
-
-```bash
-npm test
-```
+Aside: I had to do a bit of archaelogy to figure out the reason for the `customExportConditions: ['']`, and it turns out this was due to some strange interactions between Jest and [MSW](https://mswjs.io/) (suggestion found in their docs [here](https://mswjs.io/docs/migrations/1.x-to-2.x#cannot-find-module-mswnode-jsdom)).
