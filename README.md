@@ -26,7 +26,7 @@ This repo matches the Next [with-jest](https://github.com/vercel/next.js/tree/ca
 
 The only changes I made were:
 
-* `npm i @sentry/nextjs && npm i jest-environment-jsdom -D`
+* `npm i @sentry/nextjs`
 * Modify `app/utils/add.ts` to import and use `captureException`
 * Add the following lines to `jest.config.js`:
 
