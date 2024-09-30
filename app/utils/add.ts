@@ -1,5 +1,11 @@
 import "server-only";
+import { captureException } from "@sentry/nextjs";
 
 export function add(a: number, b: number) {
-  return a + b;
+  try {
+    return a + b;
+  } catch (e) {
+    captureException(e);
+    throw e;
+  }
 }
